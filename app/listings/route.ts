@@ -28,7 +28,21 @@ export async function GET(req: NextRequest) {
     filteredListings = listings.filter((l) => l.available);
   }
 
-  const response = NextResponse.json(filteredListings);
+  // Convert relative image URLs to absolute ones
+  const origin = `${url.protocol}//${url.host}`;
+  const mappedListings = filteredListings.map(listing => {
+    return {
+      ...listing,
+      images: listing.images.map(img => {
+        if (img.startsWith('/')) {
+          return `${origin}${img}`;
+        }
+        return img;
+      })
+    };
+  });
+
+  const response = NextResponse.json(mappedListings);
   return setCorsHeaders(response);
 }
 
