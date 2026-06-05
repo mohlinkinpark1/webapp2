@@ -29,7 +29,12 @@ export async function GET(req: NextRequest) {
   }
 
   // Convert relative image URLs to absolute ones
-  const origin = `${url.protocol}//${url.host}`;
+  const forwardedProto = req.headers.get("x-forwarded-proto");
+  const protocol = forwardedProto ? `${forwardedProto}:` : url.protocol;
+  const host = req.headers.get("x-forwarded-host") || req.headers.get("host") || url.host;
+  const originStr = process.env.APP_URL || `${protocol}//${host}`;
+  const origin = originStr.endsWith('/') ? originStr.slice(0, -1) : originStr;
+  
   const mappedListings = filteredListings.map(listing => {
     return {
       ...listing,
