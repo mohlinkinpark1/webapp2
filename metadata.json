@@ -1,0 +1,6 @@
+{
+  "name": "Ghazaouet Loc",
+  "description": "A holiday rental booking platform for villas and studios in Ghazaouet, with a built-in admin API to communicate with the Android Admin app.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
