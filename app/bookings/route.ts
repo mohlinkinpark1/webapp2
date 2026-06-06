@@ -17,17 +17,24 @@ export async function OPTIONS() {
 }
 
 export async function GET(req: NextRequest) {
-  if (!isAdminAuthorized(req)) {
-    const errorResponse = NextResponse.json(
-      { error: "Unauthorized. Invalid X-Admin-Token." },
-      { status: 401 }
-    );
-    return setCorsHeaders(errorResponse);
-  }
-
   const bookings = getBookings();
-  const response = NextResponse.json(bookings);
-  return setCorsHeaders(response);
+  const isAdmin = isAdminAuthorized(req);
+
+  if (isAdmin) {
+    const response = NextResponse.json(bookings);
+    return setCorsHeaders(response);
+  } else {
+    // Public view: only send listingId, startDate, endDate for confirmed bookings
+    const confirmedBookings = bookings
+      .filter(b => b.status === "confirmed")
+      .map(b => ({
+        listingId: b.listingId,
+        startDate: b.startDate,
+        endDate: b.endDate
+      }));
+    const response = NextResponse.json(confirmedBookings);
+    return setCorsHeaders(response);
+  }
 }
 
 export async function POST(req: NextRequest) {

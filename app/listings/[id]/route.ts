@@ -41,6 +41,7 @@ export async function PATCH(
     if (body.location !== undefined) updates.location = body.location;
     if (body.capacity !== undefined) updates.capacity = Number(body.capacity);
     if (body.available !== undefined) updates.available = Boolean(body.available);
+    if (body.isAvailable !== undefined) updates.available = Boolean(body.isAvailable);
     if (body.images !== undefined) updates.images = Array.isArray(body.images) ? body.images : [body.images];
     if (body.amenities !== undefined) updates.amenities = Array.isArray(body.amenities) ? body.amenities : [body.amenities];
 
@@ -53,7 +54,10 @@ export async function PATCH(
       return setCorsHeaders(notFoundResponse);
     }
 
-    const successResponse = NextResponse.json(updated);
+    const successResponse = NextResponse.json({
+      ...updated,
+      isAvailable: updated.available
+    });
     return setCorsHeaders(successResponse);
   } catch (error: any) {
     console.error(`Error updating listing ${id}:`, error);

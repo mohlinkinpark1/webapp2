@@ -40,6 +40,7 @@ export async function GET(req: NextRequest) {
   const mappedListings = filteredListings.map(listing => {
     return {
       ...listing,
+      isAvailable: listing.available,
       images: listing.images.map(img => {
         if (img.startsWith('/')) {
           return `${origin}${img}`;
@@ -117,7 +118,10 @@ export async function POST(req: NextRequest) {
       amenities
     });
 
-    const successResponse = NextResponse.json(newListing, { status: 201 });
+    const successResponse = NextResponse.json({
+      ...newListing,
+      isAvailable: newListing.available
+    }, { status: 201 });
     return setCorsHeaders(successResponse);
   } catch (error: any) {
     console.error("Error creating listing:", error);

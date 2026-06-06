@@ -39,6 +39,7 @@ export default function GhazaouetLocApp() {
   // Client listings state loaded from API
   const [listings, setListings] = useState<Listing[]>([]);
   const [bookings, setBookings] = useState<Booking[]>([]);
+  const [publicBookings, setPublicBookings] = useState<{listingId: string, startDate: string, endDate: string}[]>([]);
   const [loadingListings, setLoadingListings] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
@@ -102,6 +103,20 @@ export default function GhazaouetLocApp() {
   };
 
   // Fetch listings on mount and when booking/admin triggers changes
+  const fetchPublicBookings = async () => {
+    try {
+      const res = await fetch(getRobustUrl('/bookings'));
+      if (res.ok) {
+        const data = await res.json();
+        if (!isAdminAuthenticated) {
+           setPublicBookings(data);
+        }
+      }
+    } catch(e) {
+      console.error(e);
+    }
+  };
+
   const fetchListings = async () => {
     try {
       // By default get public listings, but if authenticated get all including hidden
@@ -159,6 +174,7 @@ export default function GhazaouetLocApp() {
       await Promise.resolve();
       if (isMounted) {
         await fetchListings();
+        await fetchPublicBookings();
       }
     };
     load();
@@ -199,6 +215,23 @@ export default function GhazaouetLocApp() {
   const handleCreateBooking = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedListing) return;
+
+    // Validate dates against publicBookings
+    const startObj = new Date(startDate);
+    const endObj = new Date(endDate);
+    
+    const overlap = publicBookings.find(b => {
+      if (b.listingId !== selectedListing.id) return false;
+      const bStart = new Date(b.startDate);
+      const bEnd = new Date(b.endDate);
+      // Check for overlap: Start falls within existing, End falls within existing, or Existing falls entirely within Start/End
+      return (startObj <= bEnd && endObj >= bStart);
+    });
+
+    if (overlap) {
+      setBookingError("Ces dates ne sont plus disponibles. Veuillez sélectionner un créneau différent.");
+      return;
+    }
 
     setBookingLoading(true);
     setBookingError('');
