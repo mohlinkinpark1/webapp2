@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { getListings, addListing } from "@/lib/db";
 import { isAdminAuthorized } from "@/lib/auth";
 
+export const dynamic = 'force-dynamic';
+
 // Direct support for CORS so that the Android APK can retrieve data easily
 function setCorsHeaders(response: NextResponse) {
   response.headers.set("Access-Control-Allow-Origin", "*");
